@@ -6,6 +6,15 @@
 //  Copyright © 2018年 KK. All rights reserved.
 //
 
+/*
+ 当使用NSTimer的scheduledTimerWithTimeInterval方法时。事实上此时Timer会被加入到当前线程的Run Loop中，且模式是默认的NSDefaultRunLoopMode。而如果当前线程就是主线程，也就是UI线程时，某些UI事件，比如UIScrollView的拖动操作，会将Run Loop切换成NSEventTrackingRunLoopMode模式，在这个过程中，默认的NSDefaultRunLoopMode模式中注册的事件是不会被执行的。也就是说，此时使用scheduledTimerWithTimeInterval添加到Run Loop中的Timer就不会执行。
+ 
+ 所以为了设置一个不被UI干扰的Timer，我们需要手动创建一个Timer，然后使用NSRunLoop的addTimer:forMode:方法来把Timer按照指定模式加入到Run Loop中。这里使用的模式是：NSRunLoopCommonModes，这个模式等效于NSDefaultRunLoopMode和NSEventTrackingRunLoopMode的结合。（参考Apple文档）
+ 
+ 经过我自己的实验，确实是这样，当我滑动UIScrollView的时候，NSTimer的处理时间根本没有调用，当我松手的时候，又执行了。
+ */
+
+
 #import "ViewController.h"
 
 @interface ViewController ()<UITableViewDelegate, UITableViewDataSource>
