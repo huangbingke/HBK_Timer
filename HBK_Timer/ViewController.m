@@ -8,8 +8,11 @@
 
 #import "ViewController.h"
 
-@interface ViewController ()
+@interface ViewController ()<UITableViewDelegate, UITableViewDataSource>
 @property (nonatomic, assign) NSInteger count;
+
+
+@property (nonatomic, strong) UITableView *myTableView;
 
 @end
 
@@ -23,16 +26,20 @@
     dispatch_async(queue, ^{
         [self addTimer];
     });
-    dispatch_async(queue, ^{
-        [self GCDTimer];
-    });
+//    dispatch_async(queue, ^{
+//        [self GCDTimer];
+//    });
     
+    
+    
+    [self.view addSubview:self.myTableView];
+//    [self addTimer];
 }
 - (void)GCDTimer {
     __block NSInteger count = 0;
     __block dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
     dispatch_time_t start = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC));
-    uint64_t interval = (uint64_t)(0.2 * NSEC_PER_SEC);
+    uint64_t interval = (uint64_t)(0.1 * NSEC_PER_SEC);
     dispatch_source_set_timer(timer, start, interval, 0);
     dispatch_source_set_event_handler(timer, ^{
         count++;
@@ -53,7 +60,7 @@
 
 - (void)timerAction:(NSTimer *)timer {
     self.count++;
-    if (self.count == 10) {
+    if (self.count == 100) {
         [timer invalidate];
         timer = nil;
     }
@@ -62,6 +69,28 @@
 
 
 
+- (UITableView *)myTableView {
+    if (!_myTableView) {
+            _myTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) style:(UITableViewStylePlain)];
+        _myTableView.dataSource = self;
+        _myTableView.delegate = self;
+        
+    }
+    return _myTableView;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 100;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static  NSString  * const cellid = @"AAAAAAAAAAAAAAA";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellid];
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:(UITableViewCellStyleDefault) reuseIdentifier:cellid];
+    }
+    cell.textLabel.text = [NSString stringWithFormat:@"%ld", indexPath.row];
+    return cell;
+}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
